@@ -20,14 +20,13 @@ pipeline {
             junit 'test-results/e2e-junit-results.xml'
          }
       }
-      stage('Allure Report'){
-         steps{
+      stage('Publish Allure Report') {
+         steps {
             allure([
-               includeProperties:false,
+               includeProperties: false,
                jdk: '',
                results: [[path: 'allure-results']]
-            ])
-         }
+         ])
       }
    }
 

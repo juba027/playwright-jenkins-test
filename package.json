@@ -1,0 +1,15 @@
+{
+  "name": "saucedemo-playwright-no-pom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright tests for SauceDemo login without POM (TypeScript)",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.46.1",
+    "typescript": "^5.4.0"
+  }
+}

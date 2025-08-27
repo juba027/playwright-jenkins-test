@@ -11,31 +11,24 @@ pipeline {
 
       stage('Run Playwright Tests') {
          steps {
-            echo 'Running Playwright tests...'
-            // --reporter=html génère un rapport HTML
-            sh 'npx playwright test --reporter=html'
+            sh 'npx playwright test'
          }
       }
 
-      stage('Archive Report') {
-         steps {
-            echo 'Archiving Playwright HTML report...'
-            archiveArtifacts artifacts: 'playwright-report/**', fingerprint: true
+      stage('JUnit Resultat'){
+         steps{
+            junit 'test-results/e2e-junit-results.xml'
+         }
+      }
+      stage('Allure Report'){
+         steps{
+            allure([
+               includeProperties:false,
+               jdk: '',
+               results: [[path: 'allure-results']]
+            ])
          }
       }
    }
 
-   post {
-      always {
-         echo 'Publishing Playwright report in Jenkins...'
-         publishHTML(target: [
-            reportName: 'Playwright Report',
-            reportDir: 'playwright-report',
-            reportFiles: 'index.html',
-            keepAll: true,
-            alwaysLinkToLastBuild: true,
-            allowMissing: false
-         ])
-      }
-   }
 }

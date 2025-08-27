@@ -8,7 +8,13 @@ export default defineConfig({
     headless: true,
     trace: 'on-first-retry',
   },
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    // JUnit pour Jenkins
+    ['junit', { outputFile: 'test-results/e2e-junit-results.xml' }],
+
+    // Allure pour rapport graphique
+    ['allure-playwright']
+  ],
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },

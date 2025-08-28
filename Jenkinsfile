@@ -1,15 +1,12 @@
 pipeline {
-  agent any {
-   stages {
-   agent{
+  agent {
     docker {
       image 'mcr.microsoft.com/playwright:v1.55.0-noble'
-      args '--ipc=host' 
+      args '--ipc=host'
     }
   }
-   
-    stages{
 
+  stages {
     stage('Install') {
       steps {
         echo 'Installing dependencies...'
@@ -24,11 +21,10 @@ pipeline {
       }
     }
 
-    stage ('stash allure report'){
-      steps{
-            stash name: 'allure-results',includes: 'allure-results/*'
-            stash name: 'playwright-report',includes: 'playwright-report/*'
-
+    stage ('stash allure report') {
+      steps {
+        stash name: 'allure-results',    includes: 'allure-results/**',    allowEmpty: true
+        stash name: 'playwright-report', includes: 'playwright-report/**', allowEmpty: true
       }
     }
 
@@ -38,13 +34,13 @@ pipeline {
       }
     }
   }
-   }
 
   post {
     always {
       unstash 'allure-results'
       unstash 'playwright-report'
-      unstash 'junit-report'
+      // si tu veux utiliser junit-report, il faut aussi le stash dans le stage précédent
+
       script {
         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
           allure includeProperties: false,
@@ -57,5 +53,4 @@ pipeline {
                        fingerprint: true, allowEmptyArchive: true
     }
   }
-}
 }

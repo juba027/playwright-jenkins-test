@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       image 'mcr.microsoft.com/playwright:v1.55.0-noble'
-      args '-u root' // nécessaire pour apt-get dans l'image Playwright
+      args '-u root' 
     }
   }
 

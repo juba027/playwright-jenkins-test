@@ -16,15 +16,9 @@ pipeline {
       }
     }
 
-    stage('Allure (stash)') {
-      steps {
-        stash name: 'allure-results', includes: 'allure-results/**', allowEmpty: true
-      }
-    }
-
     stage('JUnit Resultat') {
       steps {
-        junit 'test-results/e2e-junit-results.xml'
+        junit testResults: 'test-results/e2e-junit-results.xml', allowEmptyResults: true
       }
     }
 
@@ -37,10 +31,14 @@ pipeline {
 
   post {
     always {
-      unstash 'allure-results'
-      allure includeProperties: false,
-             jdk: '',
-             results: [[path: 'allure-results']]
+      publishHTML(target: [
+        allowMissing: true,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: 'allure-report',
+        reportFiles: 'index.html',
+        reportName: 'Allure Report'
+      ])
 
       archiveArtifacts artifacts: 'playwright-report/**,test-results/*.xml,allure-results/**,allure-report/**',
                        fingerprint: true,

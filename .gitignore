@@ -6,4 +6,7 @@ test-results/
 allure-report
 # Allure reports
 allure-results/
-allure-report/
+allure-report/allure-report/
+allure-results/
+playwright-report/
+test-results/

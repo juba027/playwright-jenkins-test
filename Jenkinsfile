@@ -1,14 +1,17 @@
 pipeline {
-  agent any
+  agent any {
+   stages {
+   agent{
+    docker {
+      image 'mcr.microsoft.com/playwright:v1.55.0-noble'
+      args '--ipc=host' 
+    }
+  }
+   }
+   
+    stages{
 
-  stages {
     stage('Install') {
-      agent {
-        docker {
-          image 'mcr.microsoft.com/playwright:v1.55.0-noble'
-          args '--ipc=host'
-        }
-      }
       steps {
         echo 'Installing dependencies...'
         sh 'npm ci'
@@ -17,36 +20,26 @@ pipeline {
     }
 
     stage('Run Playwright Tests') {
-      agent {
-        docker {
-          image 'mcr.microsoft.com/playwright:v1.55.0-noble'
-          args '--ipc=host'
-        }
-      }
       steps {
         sh 'npx playwright test --reporter=junit,allure-playwright'
       }
     }
 
-    stage('stash allure report') {
-      steps {
-        stash name: 'allure-results', includes: 'allure-results/**', allowEmpty: true
-        stash name: 'allure-report',  includes: 'allure-report/**',  allowEmpty: true
+    stage ('stash allure report'){
+      steps{
+            stashname: 'allure-results',includes: 'allure-results/*'
+            stashname: 'allure-report',includes: 'allure-report/*'
+
       }
     }
 
     stage('Generate Allure HTML') {
-      agent {
-        docker {
-          image 'mcr.microsoft.com/playwright:v1.55.0-noble'
-          args '--ipc=host'
-        }
-      }
       steps {
         sh 'npx allure generate allure-results --clean -o allure-report || true'
       }
     }
   }
+   }
 
   post {
     always {

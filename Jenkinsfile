@@ -1,5 +1,5 @@
 pipeline {
-  agent any {
+  agent any 
    stages {
    agent{
     docker {
@@ -7,7 +7,7 @@ pipeline {
       args '--ipc=host' 
     }
   }
-   }
+   
    
     stages{
 

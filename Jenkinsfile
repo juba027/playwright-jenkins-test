@@ -1,51 +1,45 @@
 pipeline {
-   agent { docker { image 'mcr.microsoft.com/playwright:v1.55.0-noble' } }
+  agent any
 
-   stages {
-      stage('Install') {
-         steps {
-            echo 'Installing dependencies...'
+  tools {
+    maven 'Maven-3.9.9'
+    jdk   'JDK17'
+  }
+
+  stages {
+    stage('Check Maven/Java') {
+      steps {
+        sh 'mvn -v'
+        sh 'java -version'
+      }
+    }
+
+    stage('Run Playwright in Docker') {
+      steps {
+        script {
+          docker.image('mcr.microsoft.com/playwright:v1.55.0-noble').inside {
             sh 'npm ci'
             sh 'npm i -D allure-commandline'
-         }
-      }
-
-      stage('Run Playwright Tests') {
-         steps {
             sh 'npx playwright test'
-            
-         }
+          }
+        }
       }
-
-      stage('JUnit Resultat'){
-         steps{
-            junit 'test-results/e2e-junit-results.xml'
-         }
-      }
-      stage('Install Java for Allure') {
-         steps {
-         sh 'apt-get update && apt-get install -y openjdk-17-jre'
-      }
-      }
-      stage('Generate Allure HTML') {
-         steps {
-            sh 'npx allure generate allure-results --clean -o allure-report || true'
-         }
     }
-      
-   }
-   post {
-    always {
-      allure includeProperties: false,
-             jdk: '',
-             results: [[path: 'allure-results']]
 
-      archiveArtifacts artifacts: 'playwright-report/**,test-results/*.xml,allure-results/**,allure-report/**',
-                       fingerprint: true,
-                       allowEmptyArchive: true
+    stage('JUnit Résultats') {
+      steps {
+        junit testResults: 'test-results/e2e-junit-results.xml', allowEmptyResults: true
+      }
     }
   }
 
+  post {
+    always {
+      // Ici le plugin Allure s’exécute sur l’agent Jenkins (où Java est dispo via Tools)
+      allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
+
+      archiveArtifacts artifacts: 'playwright-report/**,test-results/*.xml,allure-results/**,allure-report/**',
+                       fingerprint: true, allowEmptyArchive: true
+    }
+  }
 }
-
-

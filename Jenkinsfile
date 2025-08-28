@@ -27,7 +27,7 @@ pipeline {
     stage ('stash allure report'){
       steps{
             stashname: 'allure-results',includes: 'allure-results/*'
-            stashname: 'allure-results',includes: 'allure-report/*'
+            stashname: 'allure-report',includes: 'allure-report/*'
 
       }
     }
@@ -43,7 +43,7 @@ pipeline {
   post {
     always {
       unstash 'allure-results'
-      unstash 'junit-report'
+      unstash 'allure-report'
       script {
         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
           allure includeProperties: false,

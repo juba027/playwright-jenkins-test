@@ -32,7 +32,6 @@ pipeline {
       steps {
         stash name: 'allure-results', includes: 'allure-results/**', allowEmpty: true
         stash name: 'allure-report',  includes: 'allure-report/**',  allowEmpty: true
-        stash name: 'junit-report',      includes: 'test-results/*.xml',   allowEmpty: true
 
       }
     }
@@ -59,8 +58,7 @@ pipeline {
 
       unstash 'allure-results'
       unstash 'allure-report'
-      unstash 'junit-report'
-      unstash 'playwright-report'
+      
       script {
         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
           allure includeProperties: false,

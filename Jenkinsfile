@@ -22,6 +22,11 @@ pipeline {
             junit 'test-results/e2e-junit-results.xml'
          }
       }
+      stage('Install Java for Allure') {
+         steps {
+         sh 'apt-get update && apt-get install -y openjdk-17-jre'
+      }
+      }
       stage('Generate Allure HTML') {
          steps {
             sh 'npx allure generate allure-results --clean -o allure-report || true'

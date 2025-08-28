@@ -1,28 +1,14 @@
 pipeline {
-  agent {
+  agent any {
+   stages {
+   agent{
     docker {
       image 'mcr.microsoft.com/playwright:v1.55.0-noble'
-      args '-u root' 
+      args '--ipc=host' 
     }
   }
-
-  environment {
-    JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
-    PATH = "${JAVA_HOME}/bin:${PATH}"
-  }
-
-  stages {
-    stage('Install Java + Maven') {
-      steps {
-        sh '''
-          set -e
-          apt-get update
-          apt-get install -y --no-install-recommends openjdk-17-jre maven
-          java -version
-          mvn -v || true
-        '''
-      }
-    }
+   
+    stages{
 
     stage('Install') {
       steps {
@@ -34,13 +20,15 @@ pipeline {
 
     stage('Run Playwright Tests') {
       steps {
-        sh 'npx playwright test'
+        sh 'npx playwright test --reporter=junit,allure-playwright'
       }
     }
 
-    stage('JUnit Résultats') {
-      steps {
-        junit testResults: 'test-results/e2e-junit-results.xml', allowEmptyResults: true
+    stage ('stash allure report'){
+      steps{
+            stashname: 'allure-results',includes: 'allure-results/*'
+            stashname: 'junit-report',includes: 'playwright-report/*'
+
       }
     }
 
@@ -50,9 +38,12 @@ pipeline {
       }
     }
   }
+   }
 
   post {
     always {
+      unstash 'allure-results'
+      unstash 'junit-report'
       script {
         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
           allure includeProperties: false,
@@ -65,4 +56,5 @@ pipeline {
                        fingerprint: true, allowEmptyArchive: true
     }
   }
+}
 }

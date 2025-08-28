@@ -27,18 +27,19 @@ pipeline {
             sh 'npx allure generate allure-results --clean -o allure-report || true'
          }
     }
-      post {
-        // Publie Allure même si les tests échouent
-        always {
-          allure includeProperties: false,
-                 jdk: '',
-                 results: [[path: 'allure-results']]
-        }
       
-    
-        archiveArtifacts artifacts: 'playwright-report/**,test-results/*.xml, allure-results/**', fingerprint: true
-      }
    }
+   post {
+    always {
+      allure includeProperties: false,
+             jdk: '',
+             results: [[path: 'allure-results']]
+
+      archiveArtifacts artifacts: 'playwright-report/**,test-results/*.xml,allure-results/**,allure-report/**',
+                       fingerprint: true,
+                       allowEmptyArchive: true
+    }
+  }
 
 }
 

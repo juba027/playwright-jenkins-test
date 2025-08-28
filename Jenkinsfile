@@ -1,46 +1,36 @@
 pipeline {
-   agent { docker { image 'mcr.microsoft.com/playwright:v1.55.0-noble' } }
+  agent { docker { image 'mcr.microsoft.com/playwright:v1.55.0-noble' } }
 
-   stages {
-      stage('Install') {
-         steps {
-            echo 'Installing dependencies...'
-            sh 'npm ci'
-            sh 'npm i -D allure-commandline'
-         }
+  stages {
+    stage('Install') {
+      steps {
+        sh 'npm ci'
       }
-
-      stage('Run Playwright Tests') {
-         steps {
-            sh 'npx playwright test'
-            
-         }
-      }
-
-      stage('JUnit Resultat'){
-         steps{
-            junit 'test-results/e2e-junit-results.xml'
-         }
-      }
-      stage('Generate Allure HTML') {
-         steps {
-            sh 'npx allure generate allure-results --clean -o allure-report || true'
-         }
     }
-      stage('Publish Allure Report') {
-         steps {
-        publishHTML(target: [
-          reportName: 'Allure',
-          reportDir: 'allure-report',
-          reportFiles: 'index.html',
-          keepAll: true,
-          alwaysLinkToLastBuild: true,
-          allowMissing: true
-        ])
-        archiveArtifacts artifacts: 'test-results/*.xml, allure-report/**', fingerprint: true
+
+    stage('Run Playwright Tests') {
+      steps {
+        sh 'npx playwright test'
       }
-   }
+      post {
+        always {
+          allure includeProperties: false,
+                 jdk: '',
+                 results: [[path: 'allure-results']]
+        }
+      }
+    }
 
-}
-}
+    stage('Publish JUnit') {
+      steps {
+        junit 'test-results/e2e-junit-results.xml'
+      }
+    }
 
+    stage('Archive') {
+      steps {
+        archiveArtifacts artifacts: 'test-results/*.xml, allure-results/**', fingerprint: true
+      }
+    }
+  }
+}
